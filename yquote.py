@@ -7,12 +7,39 @@ import re,urllib2,sys,getopt
 from BeautifulSoup import BeautifulSoup
 from prettytable import PrettyTable 
 
+
+def usage():
+
+	print """
+	Usage: yquote.py --stock <stock name> [--market <market type>]
+		
+		-h       - prints the help and usage instructions
+		
+		--stock  - Specify the name of the stock of which you want to know the price
+		
+		--market - Specify the type of market. Currently only two markets are supported,
+		           US(US Market) and IN (Indian Market). If not specified defaults to IN.
+	
+
+	Example: yquote.py --stock google --market us
+	
+	Version: 0.1.0
+	
+	Author: Pradeep Nayak (pradeep1288@gmail.com)
+				
+	"""
 def main():
 	try:
 		opts, args = getopt.getopt(sys.argv[1:],"h",["help", "stock=", "market="])
+		
+		# if no options are specified, print the usage instructions and exit
+		if len(sys.argv) == 1:
+			usage()
+			sys.exit()
+	
 	except getopt.GetoptError, error:
 		print str(error)
-		#usage()
+		usage()
 		sys.exit(2)
 	stock = None
 	# defaulting the market type to be indian
@@ -22,7 +49,7 @@ def main():
 		if o == "--market":
 			market = a
 		elif o in ("-h", "--help"):
-			#usage()
+			usage()
 			sys.exit()
 		elif o == "--stock":
 			search_stock = a

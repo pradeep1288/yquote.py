@@ -1,14 +1,13 @@
-##What?
-A command line tool written in Python to fetch stock prices from Yahoo Finance
+##Yquote.py
+A command line tool written in Python to fetch stock prices from [Yahoo Finance](http://finance.yahoo.com/)
 
 ##Dependencies
-It needs to have the following python modules to function. The modules are:
+For this tool to function correctly, you need to have the following modules installed.
 
-* (Beautiful Soup)[http://www.crummy.com/software/BeautifulSoup/]
-* (Pretty Table)[http://pypi.python.org/pypi/PrettyTable]
+* [Beautiful Soup](http://www.crummy.com/software/BeautifulSoup/)
+* [Pretty Table](http://pypi.python.org/pypi/PrettyTable)
 
 ##Usage
-	./yquote.py --stock google --market us
 	Pradeeps-MacBook-Pro:pradeepnayak$ ./yquote.py --stock google --market us
 	+-------------+--------+----------+
 	|  Stock Name | Price  | Exchange |
@@ -17,3 +16,5 @@ It needs to have the following python modules to function. The modules are:
 	+-------------+--------+----------+
 
 ##License
+
+[Creative Commons](http://creativecommons.org/licenses/by-nc-sa/3.0/)

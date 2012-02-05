@@ -1,15 +1,14 @@
 #! /usr/bin/python
 
-''' Command line tool to fetch quotes from Yahoo
-Finance India'''
+''' Command line tool to fetch stock prices quotes from Yahoo Finance '''
 
 import re,urllib2,sys,getopt
 from BeautifulSoup import BeautifulSoup
 from prettytable import PrettyTable 
 
 
+# This functions contains the usage instructions
 def usage():
-
 	print """
 	Usage: yquote.py --stock <stock name> [--market <market type>]
 		
@@ -28,6 +27,9 @@ def usage():
 	Author: Pradeep Nayak (pradeep1288@gmail.com)
 				
 	"""
+
+
+# Main functions from where the arguments are processed and other subroutines are called	
 def main():
 	try:
 		opts, args = getopt.getopt(sys.argv[1:],"h",["help", "stock=", "market="])
@@ -57,6 +59,7 @@ def main():
 			assert False, "unhandled option"
 	stock_searcher(search_stock,market)
 
+
 #Method takes the stock to be searched as argument and returns the table of results
 def stock_searcher(search_stock,market):
 	url = "http://finance.yahoo.com/lookup?s="+search_stock+"&t=s&m="+market
@@ -64,7 +67,7 @@ def stock_searcher(search_stock,market):
 	soup = BeautifulSoup(content)
 	stocks_table = PrettyTable(["Stock Name", "Price", "Exchange"])
 
-	# get the results table
+	# All the results are present in a <div id ="yfi_sym_results"></div>
 	yfi_results = soup.find('div',id="yfi_sym_results")
 
 	try:

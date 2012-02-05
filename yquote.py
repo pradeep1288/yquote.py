@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-''' Command line tool to fetch stock prices quotes from Yahoo Finance '''
+''' Command line tool to fetch stock prices from Yahoo Finance '''
 
 import re,urllib2,sys,getopt
 from BeautifulSoup import BeautifulSoup

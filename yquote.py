@@ -14,7 +14,7 @@ def usage():
 		
 		-h       - prints the help and usage instructions
 		
-		--stock  - Specify the name of the stock of which you want to know the price
+		--stock  - A comma separate list of stocks to search
 		
 		--market - Specify the type of market. Currently only two markets are supported,
 		           US(US Market) and IN (Indian Market). If not specified defaults to IN.
@@ -54,10 +54,12 @@ def main():
 			usage()
 			sys.exit()
 		elif o == "--stock":
-			search_stock = a
+			# support multiple stocks at once per Swagat's suggestion
+			stocks_to_search = a.split(',')
 		else:
 			assert False, "unhandled option"
-	stock_searcher(search_stock,market)
+	for search_stock in stocks_to_search:
+		stock_searcher(search_stock,market)
 
 
 #Method takes the stock to be searched as argument and returns the table of results
@@ -82,10 +84,11 @@ def stock_searcher(search_stock,market):
 			stock_price = row_entry[2].renderContents()
 			exchange_type = row_entry[5].renderContents()
 			stocks_table.add_row([stock_name,stock_price,exchange_type])
+		print "\n Showing Results for: "+search_stock.upper()
 		print stocks_table
 	
 	except Exception, e:
-		print "Sorry. Could not find your stock"
+		print "Sorry. Could not find any resutls for: "+search_stock.upper()
 	else:
 		pass
 	finally:

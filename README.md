@@ -17,6 +17,7 @@ For this tool to function correctly, you need to have the following modules inst
 
 	For more help, do ./yquote.py --help
 
+
 ##License
 
 [Creative Commons](http://creativecommons.org/licenses/by-nc-sa/3.0/)

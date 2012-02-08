@@ -17,6 +17,8 @@ For this tool to function correctly, you need to have the following modules inst
 
 	For more help, do ./yquote.py --help
 
+## Version
+0.2.0
 
 ##License
 

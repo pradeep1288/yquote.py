@@ -7,6 +7,24 @@ from BeautifulSoup import BeautifulSoup
 from prettytable import PrettyTable 
 import os
 
+class ystock:
+	# Initializing the constructor
+	def __init__(self,stock_id,stock_name,exchange,purchased_value,current_value):
+		self.stock_id = stock_id
+		self.stock_name = stock_name
+		self.exchange = exchange
+		self.purchased_value = purchased_value
+		self.current_value = current_value
+
+
+
+
+
+
+
+
+
+
 # This functions contains the usage instructions
 def usage():
 	print """
@@ -36,7 +54,7 @@ def usage():
 # Main functions from where the arguments are processed and other subroutines are called	
 def main():
 	try:
-		opts, args = getopt.getopt(sys.argv[1:],"h",["help", "stock=", "market=", "exchange=", "watch"])
+		opts, args = getopt.getopt(sys.argv[1:],"h",["help", "stock=", "market=", "exchange=", "watch", "portfolio"])
 		
 		# if no options are specified, print the usage instructions and exit
 		if len(sys.argv) == 1:
@@ -69,6 +87,9 @@ def main():
 			exchange = a
 		elif o == "--watch":
 			watch = True
+		elif o == "--portfolio":
+			show_portfolio()
+			sys.exit()
 		else:
 			assert False, "unhandled option"
 			usage()
@@ -82,6 +103,37 @@ def main():
 			sys.exit()
 	if watch == False:
 		stock_searcher(stocks_to_search, market, exchange)
+
+
+def show_portfolio():
+	url = "http://finance.yahoo.com/lookup?s=gas&t=s&m=in"
+	content = urllib2.urlopen(url)
+	soup = BeautifulSoup(content)
+	stock_array = []
+	stocks_table = PrettyTable(["Stock ID","Stock Name","Exchange","Purchased Value", "Currrent Value"])
+	angular_tag_pattern = "<a href=(.*)>(.*)</a>"
+	# All the results are present in a <div id ="yfi_sym_results"></div>
+	yfi_results = soup.find('div',id="yfi_sym_results")
+	try:
+		# get individual table entries
+		yfi_table_entries = yfi_results.find('table').find('tbody').findAll('tr')
+		for j in range(len(yfi_table_entries)):	
+			row_entry = yfi_table_entries[j].findAll('td')
+			# Yahoo finance lists some old resutls which are not valid, eliminating them
+			if row_entry[0].renderContents().find('_a') != -1:
+				continue
+			stock_id = re.match(angular_tag_pattern, row_entry[0].renderContents()).group(2)
+			stock_name = row_entry[1].renderContents()
+			stock_price = row_entry[2].renderContents()
+			exchange_type = row_entry[5].renderContents().replace("NSI","NSE")
+			stock_obj = ystock(stock_id,stock_name,exchange_type,0,stock_price)
+			stock_array.append(stock_obj)	
+	except Exception, e:
+		print "Sorry. Could not find any resutls for: "+search_stock.upper()
+	for obj in stock_array:
+		stocks_table.add_row([obj.stock_id,obj.stock_name,obj.exchange,obj.purchased_value,obj.current_value])
+	print stocks_table
+				
 
 #Method takes the stock to be searched as argument and returns the table of results
 def stock_searcher(stocks_to_search,market,exchange):

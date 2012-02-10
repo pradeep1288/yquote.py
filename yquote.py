@@ -6,6 +6,7 @@ import re,urllib2,sys,getopt,time
 from BeautifulSoup import BeautifulSoup
 from prettytable import PrettyTable 
 import os
+import sqlite3
 
 class ystock:
 	# Initializing the constructor
@@ -15,15 +16,6 @@ class ystock:
 		self.exchange = exchange
 		self.purchased_value = purchased_value
 		self.current_value = current_value
-
-
-
-
-
-
-
-
-
 
 # This functions contains the usage instructions
 def usage():
@@ -88,7 +80,8 @@ def main():
 		elif o == "--watch":
 			watch = True
 		elif o == "--portfolio":
-			show_portfolio()
+			#show_portfolio()
+			show_database()
 			sys.exit()
 		else:
 			assert False, "unhandled option"
@@ -103,6 +96,22 @@ def main():
 			sys.exit()
 	if watch == False:
 		stock_searcher(stocks_to_search, market, exchange)
+
+
+def show_database():
+	stocks_table = PrettyTable(["Stock ID","Stock Name","Exchange","Purchased Value", "Currrent Value","Qty","Gain"])
+	conn = sqlite3.connect('portfolio.db')
+	c = conn.cursor()
+	d = conn.cursor()
+	c.execute('select * from portfolio')
+	for row in c:
+		gain = (row[4] - row[3])*row[5]
+		d.execute('update portfolio set gain=%f where sid="%s"' %(gain,row[0]))
+	conn.commit()
+	c.execute('select * from portfolio')
+	for row in c:
+		stocks_table.add_row(row)
+	print stocks_table
 
 
 def show_portfolio():

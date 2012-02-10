@@ -2,25 +2,27 @@
 
 ''' Command line tool to fetch stock prices from Yahoo Finance '''
 
-import re,urllib2,sys,getopt
+import re,urllib2,sys,getopt,time
 from BeautifulSoup import BeautifulSoup
 from prettytable import PrettyTable 
-
+import os
 
 # This functions contains the usage instructions
 def usage():
 	print """
 	Usage: yquote.py --stock <stock name> [--market <market type>] [--exchange <exchange name>]
 		
-		-h       - prints the help and usage instructions
+		-h         - prints the help and usage instructions
 		
-		--stock  - A comma separate list of stocks to search
+		--stock    - A comma separate list of stocks to search
 		
-		--market - Specify the type of market. Currently only two markets are supported,
-		           US(US Market) and IN (Indian Market). If not specified defaults to IN.
+		--market   - Specify the type of market. Currently only two markets are supported,
+		             US(US Market) and IN (Indian Market). If not specified defaults to IN.
 		
 		--exchange - Specify the name of the exchange you want to filter results on. If not specified
 					results from all the exchanges are returned
+		
+		--watch    - Specify this switch to constantly refresh your stock data. 
 	
 
 	Example: yquote.py --stock google --market us
@@ -34,7 +36,7 @@ def usage():
 # Main functions from where the arguments are processed and other subroutines are called	
 def main():
 	try:
-		opts, args = getopt.getopt(sys.argv[1:],"h",["help", "stock=", "market=", "exchange="])
+		opts, args = getopt.getopt(sys.argv[1:],"h",["help", "stock=", "market=", "exchange=", "watch"])
 		
 		# if no options are specified, print the usage instructions and exit
 		if len(sys.argv) == 1:
@@ -53,6 +55,7 @@ def main():
 	# defaulting the market = indian and exchange = All
 	market = "in"
 	exchange = "All"
+	watch = False
 	for o, a in opts:
 		if o == "--market":
 			market = a
@@ -64,11 +67,21 @@ def main():
 			stocks_to_search = a.split(',')
 		elif o == "--exchange":
 			exchange = a
+		elif o == "--watch":
+			watch = True
 		else:
 			assert False, "unhandled option"
 			usage()
 			sys.exit()
-	stock_searcher(stocks_to_search, market, exchange)
+	while watch:
+		try:
+			stock_searcher(stocks_to_search, market, exchange)
+			time.sleep(2)
+			os.system('clear')
+		except KeyboardInterrupt:
+			sys.exit()
+	if watch == False:
+		stock_searcher(stocks_to_search, market, exchange)
 
 #Method takes the stock to be searched as argument and returns the table of results
 def stock_searcher(stocks_to_search,market,exchange):
@@ -105,7 +118,7 @@ def stock_searcher(stocks_to_search,market,exchange):
 			pass
 		finally:
 			pass
-	print stocks_table
-		
+		print stocks_table
+
 if __name__ == "__main__":
-	main()
+    main()

@@ -27,7 +27,7 @@ def usage():
 
 	Example: yquote.py --stock google --market us
 	
-	Version: 0.2.0
+	Version: 0.3.0
 	
 	Author: Pradeep Nayak (pradeep1288@gmail.com)
 				

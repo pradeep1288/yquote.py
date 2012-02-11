@@ -17,6 +17,30 @@ class ystock:
 		self.purchased_value = purchased_value
 		self.current_value = current_value
 
+class yfolio:
+	def __init__(self, database):
+		self.database = database
+	def update(database):
+		try:
+			conn = sqlite3.connect('portfolio.db')
+			c = conn.cursor()
+			d = conn.cursor()
+			c.execute('select * from portfolio')
+			for row in c:
+				url = "http://finance.yahoo.com/lookup?s="+row[0]+"&t=s&m=in"
+				content = urllib2.urlopen(url)
+				soup = BeautifulSoup(content)	
+				yfi_results = soup.find('div',id="yfi_sym_results")
+				yfi_table_entries = yfi_results.find('table').find('tbody').findAll('tr')
+				latesval = float(yfi_table_entries[0].findAll('td')[2].renderContents())
+				
+				d.execute('update portfolio set cvalu=%f where sid="%s"' %(latesval,row[0]))
+			conn.commit()
+						
+		except Exception, e:
+			raise e
+
+
 # This functions contains the usage instructions
 def usage():
 	print """
@@ -99,6 +123,8 @@ def main():
 
 
 def show_database():
+	p = yfolio("portfolio.db")
+	p.update()
 	stocks_table = PrettyTable(["Stock ID","Stock Name","Exchange","Purchased Value", "Currrent Value","Qty","Gain"])
 	conn = sqlite3.connect('portfolio.db')
 	c = conn.cursor()

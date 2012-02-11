@@ -68,7 +68,7 @@ class portfolio:
 			c.execute('select * from portfolio')
 			for row in c:
 				gain = (row[4] - row[3])*row[5]
-			d.execute('update portfolio set gain=%f where sid="%s"' %(gain,row[0]))
+				d.execute('update portfolio set gain=%f where sid="%s"' %(gain,row[0]))
 			conn.commit()
 			c.execute('select * from portfolio')
 			for row in c:
@@ -82,20 +82,45 @@ class portfolio:
 		add_more = "y"
 		try:
 			conn = sqlite3.connect(self.database)
-			while add_more == "y":
-				stocks_to_search = raw_input("Enter the stock to search:")
-				stock_array = get_stocks(stocks_to_search)
-				sid = raw_input("Enter the Stock ID to add:")
-				pval = raw_input("Enter the purchase price:")
-				qty = raw_input("Enter number of stocks:")
-				c = conn.cursor()
-				for obj in stock_array:
-					if obj.stock_id == sid:
-						c.execute('insert into portfolio values("%s","%s","%s",%f,%f,%d,%f)' %(obj.stock_id,obj.stock_name,obj.exchange,float(pval),obj.current_value,int(qty),0.0))
-				add_more = raw_input("Continue adding more(y/n): ")
+			stocks_to_search = raw_input("Enter the stock to search:")
+			stock_array = get_stocks(stocks_to_search)
+			sid = raw_input("Enter the Stock ID to add:")
+			pval = raw_input("Enter the purchase price:")
+			qty = raw_input("Enter number of stocks:")
+			c = conn.cursor()
+			for obj in stock_array:
+				if obj.stock_id == sid:
+					c.execute('insert into portfolio values("%s","%s","%s",%f,%f,%d,%f)' %(obj.stock_id,obj.stock_name,obj.exchange,float(pval),obj.current_value,int(qty),0))
+					break
 			conn.commit()
+			add_more = raw_input("Continue adding more(y/n): ")
+			if (add_more == "y"):
+				c.close()
+				conn.close()
+				self.addstock()
+			else:
+				sys.exit()
 		except Exception, e:
-			raise e		
+			raise e	
+	
+	#delstock: delete stocks from your portfolio
+	def delstock(self):
+		del_more = "y"
+		self.show()
+		try:
+			while del_more == "y":
+				conn = sqlite3.connect(self.database)
+				stock_to_delete = raw_input("Enter the Stock ID to delete:")
+				c = conn.cursor()
+				d = conn.cursor()
+				d.execute('delete from portfolio where sid = "%s"' %(stock_to_delete))
+				conn.commit()
+				c.close()
+				d.close()
+				conn.close() 
+				del_more = raw_input("Continue adding more(y/n): ")
+		except Exception, e:
+			raise e	
 
 # This functions contains the usage instructions
 def usage():
@@ -142,7 +167,7 @@ def main():
 		sys.exit(2)
 
 	stock = None
-	# defaulting the market = indian and exchange = All
+	# defaulting the market = indian and exchange = All and watch = False and action = None
 	market = "in"
 	exchange = "All"
 	watch = False
@@ -196,6 +221,9 @@ def manage_portfolio(action):
 		elif action == "addstock":
 			pobj = portfolio("portfolio.db")
 			pobj.addstock()
+		elif action == "delstock":
+			pobj = portfolio("portfolio.db")
+			pobj.delstock()
 	
 	except Exception, e:
 		raise e

@@ -104,21 +104,32 @@ class portfolio:
 			raise e	
 	
 	#delstock: delete stocks from your portfolio
-	def delstock(self):
-		del_more = "y"
+	def sell(self):
+		sell_more = "y"
 		self.show()
 		try:
-			while del_more == "y":
+			while sell_more == "y":
 				conn = sqlite3.connect(self.database)
-				stock_to_delete = raw_input("Enter the Stock ID to delete:")
+				stock_to_sell = raw_input("Enter the Stock ID to sell:")
+				qty_sell = raw_input("Enter total stocks to sell: ")
 				c = conn.cursor()
 				d = conn.cursor()
-				d.execute('delete from portfolio where sid = "%s"' %(stock_to_delete))
+				curr_qty = c.execute('select qty from portfolio where sid ="%s"' %(stock_to_sell))
+				for row in curr_qty:
+					qty_old = row[0]
+				if int(qty_old) == int(qty_sell):
+					d.execute('delete from portfolio where sid="%s"'%(stock_to_sell))
+				elif int(qty_sell) < int(qty_old):
+					d.execute('update portfolio set qty = %d where sid = "%s" ' %((int(qty_old) - int(qty_sell)),stock_to_sell))
+				else:
+					print "You only have %d stocks with you"%(qty_old)
 				conn.commit()
 				c.close()
 				d.close()
 				conn.close() 
-				del_more = raw_input("Continue adding more(y/n): ")
+				sell_more = raw_input("Continue selling more(y/n): ")
+		except KeyboardInterrupt:
+			sys.exit()
 		except Exception, e:
 			raise e	
 
@@ -221,9 +232,9 @@ def manage_portfolio(action):
 		elif action == "addstock":
 			pobj = portfolio("portfolio.db")
 			pobj.addstock()
-		elif action == "delstock":
+		elif action == "sell":
 			pobj = portfolio("portfolio.db")
-			pobj.delstock()
+			pobj.sell()
 	
 	except Exception, e:
 		raise e

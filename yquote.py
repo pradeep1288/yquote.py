@@ -3,7 +3,7 @@
 App Name: yquote.py
 Author: Pradeep Nayak
 Version: 1.0.0
-Description: A command line app built in python which gets you live stock prices and 
+Description: A command line app built in python which gets you live stock prices and
 helps manage your portfolio showing your gains. The app fetches prices from yahoo finance.
 '''
 import re,urllib2,sys,getopt,time

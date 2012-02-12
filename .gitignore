@@ -1,0 +1,6 @@
+##Ignore my custom pyparsing.py and prettytable.py
+prettytable.py
+pyparsing.py
+
+##Ignore my DB file
+portfolio.db

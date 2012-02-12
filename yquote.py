@@ -12,6 +12,41 @@ from prettytable import PrettyTable
 import os
 import sqlite3
 
+# This functions contains the usage instructions
+def usage():
+	print """
+	Usage: yquote.py --stock <stock name> [--market <market type>] [--exchange <exchange name>]
+		
+		-h          - prints the help and usage instructions
+		
+		--stock     - A comma separate list of stocks to search
+		
+		--market    - Specify the type of market. Currently only two markets are supported,
+		              US(US Market) and IN (Indian Market). If not specified defaults to IN.
+		
+		--exchange  - Specify the name of the exchange you want to filter results on. If not specified
+					  results from all the exchanges are returned
+		
+		--watch     - Specify this switch to constantly refresh your stock data. 
+
+		--portfolio - Use this switch to manage your portfolio. Specify various actions to manage your portfolio.
+					  
+					  create    - creates your portfolio for the first time
+					  show      - displays your portfolio along with the gains
+					  update    - Updates your portfolio and calculates your gain with the latest market prices
+					  addstock  - add stocks to your portfolio
+					  sellstock - sell stocks and update your portfolio
+					  delete    - delete your entire portfolio
+	
+
+	Example: yquote.py --stock google --market us
+	
+	Version: 1.0.0
+	
+	Author: Pradeep Nayak (pradeep1288@gmail.com)
+				
+	"""
+
 # This class describes the basic stock object
 class ystock:
 	# Initializing the constructor
@@ -29,6 +64,7 @@ class portfolio:
 	#update: Updates your portfolio databases with the latest stock prices and the gains you made
 	def update(self):
 		try:
+			print "Updating ....."
 			conn = sqlite3.connect(self.database)
 			c = conn.cursor()
 			d = conn.cursor()
@@ -42,6 +78,10 @@ class portfolio:
 				latesval = float(yfi_table_entries[0].findAll('td')[2].renderContents())
 				d.execute('update portfolio set cval=%f where sid="%s"' %(latesval,row[0]))
 			conn.commit()						
+		except urllib2.URLError:
+			print "You are currently not connected to the internet. Please check your network connection"
+		except KeyboardInterrupt:
+			sys.exit()
 		except Exception, e:
 			raise e
 	
@@ -55,8 +95,8 @@ class portfolio:
 			''')
 			conn.commit()
 			c.close()
-		except Exception, e:
-			print "Sorry, portfolio already exists for you"
+		except sqlite3.OperationalError:
+			print "Sorry, portfolio already exists for you.\nHint: To view your portfolion do: yquote --portfolio show"
 	
 	#show: Displays your current portfolio
 	def show(self):
@@ -74,8 +114,9 @@ class portfolio:
 			for row in c:
 				stocks_table.add_row(row)
 			print stocks_table	
-		except Exception, e:
-			print "There was an error in showing"	
+		except sqlite3.OperationalError:
+			print "You don't have a portfolio yet!\nHint: Create your portfolio : yquote --portfolio create"
+			 	
 	
 	# addstock: This function is used  for adding stocks to the database
 	def addstock(self):
@@ -102,11 +143,16 @@ class portfolio:
 				sys.exit()
 		except sqlite3.IntegrityError: 
 			print "%s already exists in your portfolio. Cannot add again"%(sid)
+			self.addstock()
+		except urllib2.URLError:
+			print "You are currently not connected to the internet. Please check your network connection"
+		except KeyboardInterrupt:
+			sys.exit()
 		except Exception, e:
 			raise e	
 	
 	#delstock: delete stocks from your portfolio
-	def sell(self):
+	def sellstock(self):
 		sell_more = "y"
 		self.show()
 		try:
@@ -134,32 +180,6 @@ class portfolio:
 			sys.exit()
 		except Exception, e:
 			raise e	
-
-# This functions contains the usage instructions
-def usage():
-	print """
-	Usage: yquote.py --stock <stock name> [--market <market type>] [--exchange <exchange name>]
-		
-		-h         - prints the help and usage instructions
-		
-		--stock    - A comma separate list of stocks to search
-		
-		--market   - Specify the type of market. Currently only two markets are supported,
-		             US(US Market) and IN (Indian Market). If not specified defaults to IN.
-		
-		--exchange - Specify the name of the exchange you want to filter results on. If not specified
-					results from all the exchanges are returned
-		
-		--watch    - Specify this switch to constantly refresh your stock data. 
-	
-
-	Example: yquote.py --stock google --market us
-	
-	Version: 0.3.0
-	
-	Author: Pradeep Nayak (pradeep1288@gmail.com)
-				
-	"""
 
 # Main functions from where the arguments are processed and other subroutines are called	
 def main():
@@ -234,9 +254,9 @@ def manage_portfolio(action):
 		elif action == "addstock":
 			pobj = portfolio("portfolio.db")
 			pobj.addstock()
-		elif action == "sell":
+		elif action == "sellstock":
 			pobj = portfolio("portfolio.db")
-			pobj.sell()
+			pobj.sellstock()
 	
 	except Exception, e:
 		raise e

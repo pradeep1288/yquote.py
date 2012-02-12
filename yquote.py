@@ -9,6 +9,7 @@ calculate your net profit and loss
 import re,urllib2,sys,getopt,time
 from BeautifulSoup import BeautifulSoup
 from prettytable import PrettyTable 
+from types import *
 import os
 import sqlite3
 
@@ -49,7 +50,7 @@ def usage():
 
 # This class describes the basic stock object
 class ystock:
-	# Initializing the constructor
+	# Initializing basic ystock contructor
 	def __init__(self,stock_id,stock_name,exchange,current_value):
 		self.stock_id = stock_id
 		self.stock_name = stock_name
@@ -143,6 +144,7 @@ class portfolio:
 				sys.exit()
 		except sqlite3.IntegrityError: 
 			print "%s already exists in your portfolio. Cannot add again"%(sid)
+			conn.close()
 			self.addstock()
 		except urllib2.URLError:
 			print "You are currently not connected to the internet. Please check your network connection"
@@ -162,18 +164,23 @@ class portfolio:
 				qty_sell = raw_input("Enter total stocks to sell: ")
 				c = conn.cursor()
 				d = conn.cursor()
-				curr_qty = c.execute('select qty from portfolio where sid ="%s"' %(stock_to_sell))
-				for row in curr_qty:
-					qty_old = row[0]
-				if int(qty_old) == int(qty_sell):
-					d.execute('delete from portfolio where sid="%s"'%(stock_to_sell))
-				elif int(qty_sell) < int(qty_old):
-					d.execute('update portfolio set qty = %d where sid = "%s" ' %((int(qty_old) - int(qty_sell)),stock_to_sell))
+				qty_result = c.execute('select qty from portfolio where sid ="%s"' %(stock_to_sell))
+				qty_old = qty_result.fetchone()
+				if type(qty_old) is NoneType:
+					print "Stock ID not found :(. Please enter a valid Stock ID"
 				else:
-					print "You only have %d stocks with you"%(qty_old)
-				conn.commit()
-				c.close()
-				d.close()
+					if int(qty_old[0]) == int(qty_sell):
+						d.execute('delete from portfolio where sid="%s"'%(stock_to_sell))
+						conn.commit()
+						c.close()
+						d.close()
+					elif int(qty_sell) < int(qty_old[0]):
+						d.execute('update portfolio set qty = %d where sid = "%s" ' %((int(qty_old[0]) - int(qty_sell)),stock_to_sell))
+						conn.commit()
+						c.close()
+						d.close()
+					else:
+						print "You only have %d stocks with you"%(qty_old[0])
 				conn.close() 
 				sell_more = raw_input("Continue selling more(y/n): ")
 		except KeyboardInterrupt:

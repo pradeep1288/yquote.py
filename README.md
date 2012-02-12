@@ -1,11 +1,12 @@
 ##Yquote.py
-A command line tool written in Python to fetch stock prices from [Yahoo Finance](http://finance.yahoo.com/)
+A command line app built in python which gets you live stock prices and helps manage your portfolio showing your gains. The app fetches prices from Yahoo Finance [Yahoo Finance](http://finance.yahoo.com/)
 
 ##Dependencies
 For this tool to function correctly, you need to have the following modules installed.
 
 * [Beautiful Soup](http://www.crummy.com/software/BeautifulSoup/)
 * [Pretty Table](http://pypi.python.org/pypi/PrettyTable)
+* [SQLite3](http://www.sqlite.org/)
 
 ##Usage
 	Pradeeps-MacBook-Pro:pradeepnayak$ ./yquote.py --stock google --market us

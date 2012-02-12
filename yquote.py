@@ -57,6 +57,16 @@ class ystock:
 		self.exchange = exchange
 		self.current_value = current_value
 
+# Highlight the gain based on loss/profit. loss is highlighted in red and profit in green
+class highlight:
+	def __init__(self, gain):
+		self.gain = gain
+	def get_str(self):
+		if self.gain <= 0:
+			return "\033[91m"+str(self.gain)+"\033[0m"
+		else: 
+			return "\033[92m"+"+"+str(self.gain)+"\033[0m"
+
 # This class decsribeds the porfolio object and supported functions with the portfolio
 class portfolio:
 	def __init__(self, database):
@@ -113,7 +123,7 @@ class portfolio:
 			conn.commit()
 			c.execute('select * from portfolio')
 			for row in c:
-				stocks_table.add_row(row)
+				stocks_table.add_row([row[0],row[1],row[2],row[3],row[4],row[5],highlight(row[6]).get_str()])
 			print stocks_table	
 		except sqlite3.OperationalError:
 			print "You don't have a portfolio yet!\nHint: Create your portfolio : yquote --portfolio create"

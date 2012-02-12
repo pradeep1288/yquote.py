@@ -56,7 +56,7 @@ class portfolio:
 			conn.commit()
 			c.close()
 		except Exception, e:
-			print "Sorry! Could not create the table"
+			print "Sorry, portfolio already exists for you"
 	
 	#show: Displays your current portfolio
 	def show(self):

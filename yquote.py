@@ -187,6 +187,20 @@ class portfolio:
 			sys.exit()
 		except Exception, e:
 			raise e	
+	
+	#delete : remove your entire portfolio database
+	def delete(self):
+		try:
+			os.stat(self.database)
+			del_opt = raw_input("Are you sure?(y/n): ")
+			if del_opt == "y":
+				os.unlink(self.database)
+				print "Deleted your portfolio successfully!"
+				sys.exit()
+			else:
+				pass
+		except OSError:
+			print "No portfolio exists for you!"		
 
 # Main functions from where the arguments are processed and other subroutines are called	
 def main():
@@ -264,7 +278,11 @@ def manage_portfolio(action):
 		elif action == "sellstock":
 			pobj = portfolio("portfolio.db")
 			pobj.sellstock()
-	
+		elif action == "delete":
+			pobj = portfolio("portfolio.db")
+			pobj.delete()
+		else:
+			pass
 	except Exception, e:
 		raise e
 

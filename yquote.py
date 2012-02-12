@@ -4,7 +4,7 @@ App Name: yquote.py
 Author: Pradeep Nayak
 Version: 1.0.0
 Description: A command line app built in python which gets you live stock prices and 
-helps manage your portfolio showing your gains. The app fetches prices from yahoo finance
+helps manage your portfolio showing your gains. The app fetches prices from yahoo finance.
 '''
 import re,urllib2,sys,getopt,time
 from BeautifulSoup import BeautifulSoup
@@ -268,6 +268,7 @@ def manage_portfolio(action):
 	except Exception, e:
 		raise e
 
+# prints and return an array of stock objects.
 def get_stocks(stocks_to_search):
 	url = "http://finance.yahoo.com/lookup?s="+stocks_to_search+"&t=s&m=in"
 	content = urllib2.urlopen(url)
@@ -328,13 +329,8 @@ def stock_searcher(stocks_to_search,market,exchange):
 					stocks_table.add_row([stock_name,stock_price,exchange_type])
 				else:
 					pass
-	
 		except Exception, e:
 			print "Sorry. Could not find any resutls for: "+search_stock.upper()
-		else:
-			pass
-		finally:
-			pass
 		print stocks_table
 
 if __name__ == "__main__":

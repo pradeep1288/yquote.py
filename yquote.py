@@ -51,7 +51,7 @@ class portfolio:
 			conn = sqlite3.connect(self.database)
 			c = conn.cursor()
 			c.execute('''create table portfolio
-			(sid text, sname text, exch text, pval real, cval real, qty int, gain real)
+			(sid text UNIQUE, sname text, exch text, pval real, cval real, qty int, gain real)
 			''')
 			conn.commit()
 			c.close()
@@ -100,6 +100,8 @@ class portfolio:
 				self.addstock()
 			else:
 				sys.exit()
+		except sqlite3.IntegrityError: 
+			print "%s already exists in your portfolio. Cannot add again"%(sid)
 		except Exception, e:
 			raise e	
 	

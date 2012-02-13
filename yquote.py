@@ -102,7 +102,7 @@ class portfolio:
             conn = sqlite3.connect(self.database)
             c = conn.cursor()
             c.execute('''create table portfolio
-            (sid text UNIQUE, sname text, exch text, pval real, cval real, qty int, gain real)
+            (sid text UNIQUE, sname text, qty int, cval real, amntin real, mktval real, gain real)
             ''')
             conn.commit()
             c.close()
@@ -112,23 +112,24 @@ class portfolio:
     #show: Displays your current portfolio
     def show(self):
         try:
-            stocks_table = PrettyTable(["Stock ID","Stock Name","Exchange","Purchased Value", "Currrent Value","Qty","Gain"])
+            stocks_table = PrettyTable(["Stock ID", "Stock Name", "Qty", "Current Value", "Amount Invested", "Market Value","Gain"])
             conn = sqlite3.connect('portfolio.db')
             c = conn.cursor()
             d = conn.cursor()
             c.execute('select * from portfolio')
             for row in c:
-                gain = (row[4] - row[3])*row[5]
-                d.execute('update portfolio set gain=%f where sid="%s"' %(gain,row[0]))
+                mktval = row[2]*row[3]
+                gain = row[5]-row[4]
+                d.execute('update portfolio set gain=%f,mktval=%f where sid="%s"' %(gain,mktval,row[0]))
             conn.commit()
             c.execute('select * from portfolio')
             for row in c:
                 stocks_table.add_row([row[0],row[1],row[2],row[3],row[4],row[5],highlight(row[6]).get_str()])
-            print stocks_table  
+            print stocks_table
         except sqlite3.OperationalError:
             print "You don't have a portfolio yet!\nHint: Create your portfolio : yquote --portfolio create"
-                
-    
+
+
     # addstock: This function is used  for adding stocks to the database
     def addstock(self):
         add_more = "y"
@@ -142,7 +143,9 @@ class portfolio:
             c = conn.cursor()
             for obj in stock_array:
                 if obj.stock_id == sid:
-                    c.execute('insert into portfolio values("%s","%s","%s",%f,%f,%d,%f)' %(obj.stock_id,obj.stock_name,obj.exchange,float(pval),obj.current_value,int(qty),0))
+                    amntin = float(pval)*int(qty)
+                    mktval = int(qty)*float(obj.current_value)
+                    c.execute('insert into portfolio values("%s","%s",%d,%f,%f,%f,%f)' %(obj.stock_id,obj.stock_name,int(qty),float(obj.current_value),amntin,mktval,0))
                     break
             conn.commit()
             add_more = raw_input("Continue adding more(y/n): ")
@@ -153,16 +156,26 @@ class portfolio:
             else:
                 sys.exit()
         except sqlite3.IntegrityError: 
-            print "%s already exists in your portfolio. Cannot add again"%(sid)
-            conn.close()
-            self.addstock()
+            print "%s already exists in your portfolio."%(sid)
+            update_existing = raw_input("Update the %s in your portfolio with the entered values(y/n):"%(sid))
+            if update_existing == "y":
+                d = conn.cursor()
+                result = d.execute('select amntin,qty from portfolio where sid="%s"'%(sid))
+                row = result.fetchone()
+                amntin = row[0] + int(qty)*float(pval)
+                new_qty = int(qty) + row[1]
+                c.execute('update portfolio set amntin=%f,qty=%d where sid="%s"'%(amntin,new_qty,sid))
+                conn.commit()
+            else:
+                conn.close()
+                self.addstock()
         except urllib2.URLError:
             print "You are currently not connected to the internet. Please check your network connection"
         except KeyboardInterrupt:
             sys.exit()
         except Exception, e:
-            raise e 
-    
+            raise e
+
     #delstock: delete stocks from your portfolio
     def sellstock(self):
         sell_more = "y"
@@ -174,7 +187,7 @@ class portfolio:
                 qty_sell = raw_input("Enter total stocks to sell: ")
                 c = conn.cursor()
                 d = conn.cursor()
-                qty_result = c.execute('select qty from portfolio where sid ="%s"' %(stock_to_sell))
+                qty_result = c.execute('select qty,amntin,cval from portfolio where sid ="%s"' %(stock_to_sell))
                 qty_old = qty_result.fetchone()
                 if type(qty_old) is NoneType:
                     print "Stock ID not found :(. Please enter a valid Stock ID"
@@ -185,7 +198,8 @@ class portfolio:
                         c.close()
                         d.close()
                     elif int(qty_sell) < int(qty_old[0]):
-                        d.execute('update portfolio set qty = %d where sid = "%s" ' %((int(qty_old[0]) - int(qty_sell)),stock_to_sell))
+                        amntin = float(qty_old[1]) - (int(qty_sell)*float(qty_old[2]))
+                        d.execute('update portfolio set qty = %d,amntin=%f where sid = "%s" ' %((int(qty_old[0]) - int(qty_sell)),amntin,stock_to_sell))
                         conn.commit()
                         c.close()
                         d.close()

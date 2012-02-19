@@ -362,15 +362,22 @@ def stock_searcher(stocks_to_search,market,exchange):
                 # Yahoo finance lists some old resutls which are not valid, eliminating them
                 if row_entry[0].renderContents().find('_a') != -1:
                     continue
-                stock_name = row_entry[1].renderContents()
-                stock_price = row_entry[2].renderContents()
-                exchange_type = row_entry[5].renderContents().replace("NSI","NSE")
-                if exchange_type == exchange:
-                    stocks_table.add_row([stock_name,stock_price,exchange_type])
-                elif exchange == "All":
-                    stocks_table.add_row([stock_name,stock_price,exchange_type])
                 else:
-                    pass
+                    stock_name = row_entry[1].renderContents()
+                    # Color the stock price based on the last close price
+                    if str(row_entry[2]).find('up') >=0:
+                        stock_price = "\033[92m"+row_entry[2].renderContents()+"\033[0m"
+                    elif str(row_entry[2]).find('down') >=0:
+                        stock_price = "\033[91m"+row_entry[2].renderContents()+"\033[0m"
+                    else:
+                        pass
+                    exchange_type = row_entry[5].renderContents().replace("NSI","NSE")
+                    if exchange_type == exchange:
+                        stocks_table.add_row([stock_name,stock_price,exchange_type])
+                    elif exchange == "All":
+                        stocks_table.add_row([stock_name,stock_price,exchange_type])
+                    else:
+                        pass
         except Exception, e:
             print "Sorry. Could not find any resutls for: "+search_stock.upper()
         print stocks_table

@@ -373,7 +373,7 @@ def stock_searcher(stocks_to_search,market,exchange):
                     pass
         except Exception, e:
             print "Sorry. Could not find any resutls for: "+search_stock.upper()
-        print stocks_table
+    print stocks_table
 
 if __name__ == "__main__":
     main()
